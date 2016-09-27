@@ -53,7 +53,7 @@ for iRepetition = 1:number_of_repetitions
     
     treino=training(:,medoids); % insere as medoids
     
-    test = dataset_name(holdout.test(1),: );
+    test = X_NEW(holdout.test(1),: );
     testLabels = Y(holdout.test(1),:);
     
     %%    algortimos de seleção aqui
@@ -65,8 +65,8 @@ for iRepetition = 1:number_of_repetitions
     resp_temp = classifier_temp.predict(test(:,medoids));
     resp_temp2 = classifier_temp2.predict(test(:,medoids));
     
-    results(iRepetition) = sum(testLabels == resp_temp)/length(resp_temp);    
-    results2(iRepetition) = sum(testLabels == resp_temp2)/length(resp_temp2);    
+    results(iRepetition) = sum(strcmp(testLabels, resp_temp))/length(resp_temp);    
+    results2(iRepetition) = sum(strcmp(testLabels, resp_temp2))/length(resp_temp2);    
                  
 end
 
