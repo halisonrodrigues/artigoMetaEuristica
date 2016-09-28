@@ -6,8 +6,10 @@ tic
 %load yale;
 %load umist;
 %disp(dataset_name);
-load base\\yeast;
-load base\\classYeast;
+%load base\\yeast;
+%load base\\classYeast;
+load base\\ionosphere2;
+load base\\classIonosphere;
 disp(dataset_name);
 
 %% Experiment Parameters
@@ -27,6 +29,10 @@ number_of_repetitions = 10;
  holdout = cvpartition(Y, 'HoldOut', test_sample_proportion);
 
 results = zeros(number_of_repetitions, 1);
+results2 = zeros(number_of_repetitions, 1);
+resultsM = zeros(number_of_repetitions, 1);
+results2M = zeros(number_of_repetitions, 1);
+
 for iRepetition = 1:number_of_repetitions
     % Holdout partitioning
 %     if exist('holdouts_100', 'var')
@@ -47,11 +53,15 @@ for iRepetition = 1:number_of_repetitions
     training = dataset_name(holdout.training(1),:);
     trainingLabels = Y(holdout.training(1),:);
     
-    [~,k_next,medoids,~] = getClusters(training);
+    [si,k,medoids,clusters,tabela_correlacoes] = getClusters(training);
     
-    n_features(iRepetition) = k_next; % insere o numero k
+    [resultados, kM, novaMedoids,clustersM] = metaHeuristica(si,k,medoids,clusters,tabela_correlacoes,size(dataset_name,2));
+      
+    n_features(iRepetition) = k; % insere o numero k
     
     treino=training(:,medoids); % insere as medoids
+    
+    treinoM=training(:,novaMedoids); % treino com as medoids da metaHeuristica
     
     test = dataset_name(holdout.test(1),: );
     testLabels = Y(holdout.test(1),:);
@@ -67,7 +77,16 @@ for iRepetition = 1:number_of_repetitions
     
     results(iRepetition) = sum(testLabels == resp_temp)/length(resp_temp);    
     results2(iRepetition) = sum(testLabels == resp_temp2)/length(resp_temp2);    
-                 
+
+    % experimento metaHeuristica aqui
+    classifier_tempM = classifier1(treinoM,trainingLabels);
+    classifier_temp2M = classifier2(treinoM,trainingLabels);
+    
+    resp_tempM = classifier_tempM.predict(test(:,novaMedoids));
+    resp_temp2M = classifier_temp2M.predict(test(:,novaMedoids));
+    
+    resultsM(iRepetition) = sum(testLabels == resp_tempM)/length(resp_tempM);    
+    results2M(iRepetition) = sum(testLabels == resp_temp2M)/length(resp_temp2M);
 end
 
 %% Results
@@ -75,9 +94,15 @@ disp('KNN')
 std_accuracy = std(results)
 mean_accuracy = mean(results)
 
+std_accuracy = std(resultsM)
+mean_accuracy = mean(resultsM)
+
 disp('NB')
 std_accuracy = std(results2)
 mean_accuracy = mean(results2)
+
+std_accuracy = std(results2M)
+mean_accuracy = mean(results2M)
 
 disp(n_features);
 disp(['Mean_feature  >>> ' num2str(mean(n_features))]);

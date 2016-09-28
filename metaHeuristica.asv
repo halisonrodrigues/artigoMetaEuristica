@@ -1,4 +1,5 @@
-function [resultados,k,novaMedoids,clusters] = metaHeuristica(si,k,medoids,clusters,tabela_correlacoes,tamanho)
+function [resultados,k,novaMedoids,clusters] = metaHeuristica(si,k,medoids,clusters,tabela_correlacoes)
+clear;
 %% cálculo do algoritmo original
 %load ('base\\yeast.mat');
 %[si,k,medoids,clusters,tabela_correlacoes] = getClusters(dataset_name);
@@ -42,6 +43,7 @@ novaMedoids = medoids;
             % cluster e a colocando em outro cluster
         elseif (nv == 3)
             if (contadorShaking < 10)
+                tamanho = size(dataset_name,2);
                 [clusters,novaMedoids] = shaking(clusters,tamanho,novaMedoids,candidatos);
                 candidatos = getCandidatos(k,novaMedoids,clusters,tabela_correlacoes);
                 nv = 1;
